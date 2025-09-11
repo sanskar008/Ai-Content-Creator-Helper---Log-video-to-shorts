@@ -2,12 +2,14 @@ import os
 import google.generativeai as genai
 import subprocess
 import json
+import re
 
 # -----------------------------
 # CONFIG
 # -----------------------------
 GENAI_API_KEY = "AIzaSyCAuuQRcB4VzOaIjlSCSySFcdju1jtA7bo"  # paste your Gemini API key
 genai.configure(api_key=GENAI_API_KEY)
+model = genai.GenerativeModel("models/gemini-2.5-pro")
 
 INPUT_VIDEO = "sample2.mp4"
 OUTPUT_DIR = "shorts"
@@ -39,21 +41,21 @@ def transcribe(audio_path):
 # -----------------------------
 # STEP 3: Ask Gemini for Highlights
 # -----------------------------
-def get_highlights(transcript_text):
-        
+def get_highlights(transcript, model):
     prompt = (
         "Given the following transcript, extract 3 of the most interesting, engaging, or insightful moments. "
         "For each, return a JSON list of objects with keys: 'start', 'end', and 'text'. "
-        "Format example: [{\"start\": \"00:00:00\", \"end\": \"00:00:10\", \"text\": \"...\"}, ...]\n"
+        'Format example: [{"start": "00:00:00", "end": "00:00:10", "text": "..."}, ...]\n'
         "Transcript:\n" + transcript
     )
 
     response = model.generate_content(prompt)
-    print("Gemini raw response:", response.text)  # Debug: see what Gemini returns
+    raw = response.text
+    print("Gemini raw response:", raw)
 
-    # Try to parse as JSON, fallback to empty list if parsing fails
     try:
-        highlights = json.loads(response.text)
+        cleaned = extract_json_from_gemini_response(raw)
+        highlights = json.loads(cleaned)
         if not isinstance(highlights, list):
             raise ValueError("Not a list")
     except Exception as e:
@@ -61,11 +63,21 @@ def get_highlights(transcript_text):
         highlights = []
 
     if not highlights:
-        print("No highlights found. Consider refining your prompt or checking the transcript.")
+        print(
+            "No highlights found. Consider refining your prompt or checking the transcript."
+        )
     else:
         print("Gemini Highlights:", highlights)
 
     return highlights
+
+
+def extract_json_from_gemini_response(response_text):
+    # Remove triple backticks and optional 'json' after them
+    cleaned = re.sub(
+        r"^```json\s*|^```\s*|```$", "", response_text.strip(), flags=re.MULTILINE
+    )
+    return cleaned
 
 
 # -----------------------------
@@ -95,7 +107,7 @@ if __name__ == "__main__":
     transcript = transcribe(audio)
 
     print("▶ Asking Gemini for highlights...")
-    highlights = get_highlights(transcript)
+    highlights = get_highlights(transcript, model)
     print("Gemini Highlights:", highlights)
 
     print("▶ Cutting video with FFmpeg...")
