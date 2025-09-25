@@ -1,0 +1,8 @@
+python-dotenv
+google-generativeai
+openai-whisper
+yt-dlp
+nltk
+moviepy
+imageio[ffmpeg]
+pydub

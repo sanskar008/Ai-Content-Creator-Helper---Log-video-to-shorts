@@ -1,0 +1,33 @@
+# Ignore environment variable files
+.env
+
+# Ignore temporary files
+*.pyc
+__pycache__/
+*.pyo
+*.pyd
+.Python
+env/
+pip-log.txt
+pip-delete-this-directory.txt
+.tox
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.log
+.git
+.mypy_cache
+.pytest_cache
+.hypothesis
+
+# Ignore output directories
+output/
+shorts/
+demo_out/
+*.mp4
+*.wav
+*.json
+*.srt

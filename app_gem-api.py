@@ -1,13 +1,18 @@
 import os
+from dotenv import load_dotenv
 import google.generativeai as genai
 import subprocess
 import json
 import re
 
+
 # -----------------------------
 # CONFIG
 # -----------------------------
-GENAI_API_KEY = "AIzaSyCAuuQRcB4VzOaIjlSCSySFcdju1jtA7bo"  # paste your Gemini API key
+load_dotenv()
+GENAI_API_KEY = os.getenv("GEMINI_API_KEY")
+if not GENAI_API_KEY:
+    raise ValueError("GEMINI_API_KEY not set in .env file.")
 genai.configure(api_key=GENAI_API_KEY)
 model = genai.GenerativeModel("models/gemini-2.5-pro")
 
